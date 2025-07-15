@@ -1,0 +1,38 @@
+name: deploy dist
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: clone code repository
+              uses: actions/checkout@v4
+
+            - name: install the Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '22'
+
+            - name:  print the node version
+              run: node -v
+
+            - name : Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm test
+              
+
+
+
+
+
+
+             
+
+            
