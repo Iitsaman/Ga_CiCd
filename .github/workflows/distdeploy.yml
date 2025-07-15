@@ -3,7 +3,7 @@ name: deploy the dist
 on:
   push:
     branches:
-      - main
+      - dev
   workflow_dispatch:
 
 jobs:
