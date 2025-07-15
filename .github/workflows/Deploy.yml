@@ -1,0 +1,106 @@
+name: deployment in github pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: clone code repository
+              uses: actions/checkout@v4
+
+            - name: install the Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '22'
+
+            - name:  print the node version
+              run: node -v
+
+            - name: Cache npm modules
+              uses: actions/cache@v4
+              with:
+                path: ~/.npm
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-npm-
+
+            
+
+            - name : Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm test
+    build:
+         needs: test
+         runs-on: ubuntu-latest
+         steps:
+
+            - name: clone code repository
+              uses: actions/checkout@v4
+
+            - name: install the Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '22'
+
+            - name: Cache npm modules
+              uses: actions/cache@v4
+              with:
+                path: ~/.npm
+                key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+                restore-keys: |
+                 ${{ runner.os }}-npm-
+
+            - name : Install dependencies
+              run: npm ci
+
+            - name: Build project
+              run: npm run build  
+
+            - name: Upload build artifacts
+              uses: actions/upload-pages-artifact@v3
+              with:
+                name: github-pages
+                path: dist
+        
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        
+        environment:
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
+
+        permissions:
+         pages: write
+         id-token: write
+
+        steps:
+          - name: Deploy to GitHub Pages
+            id: deployment
+            uses: actions/deploy-pages@v4
+            with:
+                token: ${{secrets.GITHUB_TOKEN}}
+
+
+
+
+
+
+         #   - name: Download build artifacts
+          #    uses: actions/download-artifact@v4
+           #   with:
+            #    name: dist-folder
+             #   path: dist
+
+          #  - name: Deploy dist folder
+           #   run: echo "deploy sucess"
+             
+
